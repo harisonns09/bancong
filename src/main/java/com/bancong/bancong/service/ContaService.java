@@ -48,7 +48,7 @@ public class ContaService {
     }
 
     public ContaDTO realizarPagamento(TransacaoDTO transacaoDTO) {
-        Conta conta = contaRepository.findById(transacaoDTO.getContaDestino())
+        Conta conta = contaRepository.findById(transacaoDTO.getContaDebitada())
                 .orElseThrow(ContaNaoEncontradaException::new);
 
         BigDecimal taxa = calcularTaxa(transacaoDTO.getFormaPagamento(), transacaoDTO.getValor());

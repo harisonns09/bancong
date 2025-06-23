@@ -24,13 +24,13 @@ public class TransacaoController {
 
     @PostMapping("/deposito")
     public ResponseEntity<String> depositar(@RequestBody TransacaoDTO dto) {
-        contaService.depositar(dto.getContaDestino(), dto.getValor());
+        contaService.depositar(dto.getContaDebitada(), dto.getValor());
         return ResponseEntity.ok("Depósito realizado com sucesso.");
     }
 
     @PostMapping("/transferencia")
     public ResponseEntity<String> transferir(@RequestBody TransacaoDTO dto) {
-        contaService.transferir(dto.getContaOrigem(), dto.getContaDestino(), dto.getValor());
+        contaService.transferir(dto.getContaDebitada(), dto.getContaCreditada(), dto.getValor());
         return ResponseEntity.ok("Transferência realizada com sucesso.");
     }
 }

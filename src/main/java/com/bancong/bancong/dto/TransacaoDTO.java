@@ -15,7 +15,7 @@ import lombok.Setter;
 @Builder
 public class TransacaoDTO {
     private String formaPagamento; // D, C ou P
-    private Integer contaDestino;
-    private Integer contaOrigem;
+    private Integer contaDebitada;
+    private Integer contaCreditada;
     private BigDecimal valor;
 }
