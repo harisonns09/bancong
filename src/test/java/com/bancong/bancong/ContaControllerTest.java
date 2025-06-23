@@ -37,10 +37,15 @@ public class ContaControllerTest {
         ContaDTO dto = new ContaDTO(1, BigDecimal.valueOf(100));
         when(contaService.criarConta(any())).thenReturn(dto);
 
-        ResponseEntity<ContaDTO> response = contaController.criarConta(dto);
+        ResponseEntity<String> response = contaController.criarConta(dto);
 
         assertEquals(201, response.getStatusCodeValue());
-        assertEquals(dto.getNumeroConta(), response.getBody().getNumeroConta());
+
+        String expectedMessage = String.format(
+                "Conta criada com sucesso! Número da conta: %d, saldo inicial: %s",
+                dto.getNumeroConta(),
+                dto.getSaldo().toString());
+        assertEquals(expectedMessage, response.getBody());
     }
 
     @Test
@@ -58,8 +63,7 @@ public class ContaControllerTest {
     void testListarContas() {
         List<ContaDTO> contas = Arrays.asList(
                 new ContaDTO(1, BigDecimal.valueOf(100)),
-                new ContaDTO(2, BigDecimal.valueOf(200))
-        );
+                new ContaDTO(2, BigDecimal.valueOf(200)));
         when(contaService.listarContas()).thenReturn(contas);
 
         ResponseEntity<List<ContaDTO>> response = contaController.listarContas();

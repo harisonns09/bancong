@@ -23,10 +23,15 @@ public class ContaController {
         this.contaService = contaService;
     }
 
+
     @PostMapping
-    public ResponseEntity<ContaDTO> criarConta(@RequestBody ContaDTO contaDTO) {
+    public ResponseEntity<String> criarConta(@RequestBody ContaDTO contaDTO) {
         ContaDTO novaConta = contaService.criarConta(contaDTO);
-        return ResponseEntity.status(201).body(novaConta);
+        String mensagem = String.format(
+                "Conta criada com sucesso! Número da conta: %d, saldo inicial: %s",
+                novaConta.getNumeroConta(),
+                novaConta.getSaldo().toString());
+        return ResponseEntity.status(201).body(mensagem);
     }
 
     @GetMapping
