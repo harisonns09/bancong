@@ -15,5 +15,5 @@ import lombok.Setter;
 @Builder
 public class ContaDTO {
     private Integer numeroConta;
-    private BigDecimal saldo;
+    private BigDecimal saldo;   
 }
