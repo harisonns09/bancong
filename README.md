@@ -68,9 +68,38 @@ cd bancong
 ```
 
 Certifique-se de configurar o banco de dados em src/main/resources/application.properties:
-```
+```bash
 spring.datasource.url=jdbc:postgresql://localhost:5432/bancong
 spring.datasource.username=seu_usuario
 spring.datasource.password=sua_senha
 spring.jpa.hibernate.ddl-auto=update
+```
+
+Exemplo de Requisição
+Criar Conta
+
+```bash
+POST /conta
+{
+  "saldo": 1000.00
+}
+```
+Realizar Pagamento
+```bash
+POST /transacao
+{
+  "formaPagamento": "C",
+  "contaDestino": 1,
+  "valor": 200.00
+}
+```
+
+Transferência
+```bash
+POST /transacao/transferencia
+{
+  "contaOrigem": 1,
+  "contaDestino": 2,
+  "valor": 100.00
+}
 ```
