@@ -24,7 +24,9 @@ public class ContaService {
 
     public ContaDTO criarConta(ContaDTO contaDTO) {
         Conta conta = new Conta();
+        conta.setConta(contaDTO.getNumeroConta());
         conta.setSaldo(contaDTO.getSaldo());
+
         Conta contaSalva = contaRepository.save(conta);
         return new ContaDTO(contaSalva.getConta(), contaSalva.getSaldo());
     }
@@ -32,18 +34,17 @@ public class ContaService {
     public ContaDTO consultarConta(Integer numeroConta) {
         Conta conta = contaRepository.findById(numeroConta)
                 .orElseThrow(() -> new RuntimeException("Conta não encontrada"));
-        return ContaDTO.builder()
-                .numeroConta(conta.getConta())
-                .saldo(conta.getSaldo())
-                .build();
+        return new ContaDTO(conta.getConta(), conta.getSaldo());
     }
 
     public List<ContaDTO> listarContas() {
         List<ContaDTO> contaDTOs = new ArrayList<>();
         List<Conta> contas = contaRepository.findAll();
+
         for (Conta conta : contas) {
-            contaDTOs.add(toDTO(conta));
+            contaDTOs.add(new ContaDTO(conta.getConta(), conta.getSaldo()));
         }
+
         return contaDTOs;
     }
 
@@ -61,7 +62,7 @@ public class ContaService {
         conta.setSaldo(conta.getSaldo().subtract(totalDebito));
         Conta contaAtualizada = contaRepository.save(conta);
 
-        return toDTO(contaAtualizada);
+        return new ContaDTO(contaAtualizada.getConta(), contaAtualizada.getSaldo());
     }
 
     public void depositar(Integer numeroConta, BigDecimal valor) {
@@ -69,29 +70,26 @@ public class ContaService {
             throw new RuntimeException("Valor do depósito deve ser positivo");
         }
 
-        Conta conta = contaRepository.findByConta(numeroConta)
+        Conta conta = contaRepository.findById(numeroConta)
                 .orElseThrow(() -> new RuntimeException("Conta não encontrada"));
 
         conta.setSaldo(conta.getSaldo().add(valor));
         contaRepository.save(conta);
     }
 
-    public void transferir(Integer contaOrigem, Integer contaDestino, BigDecimal valor) {
-        if (contaOrigem.equals(contaDestino)) {
-            throw new RuntimeException("Contas devem ser diferentes");
-        }
-
-        Conta origem = contaRepository.findByConta(contaOrigem)
-                .orElseThrow(() -> new RuntimeException("Conta de origem não encontrada"));
-        Conta destino = contaRepository.findByConta(contaDestino)
-                .orElseThrow(() -> new RuntimeException("Conta de destino não encontrada"));
-
+    public void transferir(Integer contaDebitada, Integer contaCreditada, BigDecimal valor) {
         if (valor.compareTo(BigDecimal.ZERO) <= 0) {
             throw new RuntimeException("Valor da transferência deve ser positivo");
         }
 
+        Conta origem = contaRepository.findById(contaDebitada)
+                .orElseThrow(() -> new RuntimeException("Conta de origem não encontrada"));
+
+        Conta destino = contaRepository.findById(contaCreditada)
+                .orElseThrow(() -> new RuntimeException("Conta de destino não encontrada"));
+
         if (origem.getSaldo().compareTo(valor) < 0) {
-            throw new RuntimeException("Saldo insuficiente");
+            throw new SaldoInsuficienteException();
         }
 
         origem.setSaldo(origem.getSaldo().subtract(valor));
@@ -104,9 +102,9 @@ public class ContaService {
     private BigDecimal calcularTaxa(String formaPagamento, BigDecimal valor) {
         switch (formaPagamento.toUpperCase()) {
             case "D":
-                return valor.multiply(new BigDecimal("0.03"));
+                return valor.multiply(BigDecimal.valueOf(0.03));
             case "C":
-                return valor.multiply(new BigDecimal("0.05"));
+                return valor.multiply(BigDecimal.valueOf(0.05));
             case "P":
                 return BigDecimal.ZERO;
             default:
@@ -114,11 +112,5 @@ public class ContaService {
         }
     }
 
-    private ContaDTO toDTO(Conta conta) {
-        return ContaDTO.builder()
-                .numeroConta(conta.getConta())
-                .saldo(conta.getSaldo())
-                .build();
-    }
 }
 
