@@ -1,6 +1,12 @@
 package com.bancong.bancong.dto;
 
-import lombok.*;
+import java.math.BigDecimal;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -11,5 +17,5 @@ public class TransacaoDTO {
     private String formaPagamento; // D, C ou P
     private Integer contaDestino;
     private Integer contaOrigem;
-    private Double valor;
+    private BigDecimal valor;
 }

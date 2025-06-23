@@ -1,5 +1,6 @@
 package com.bancong.bancong.service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,18 +23,9 @@ public class ContaService {
     }
 
     public ContaDTO criarConta(ContaDTO contaDTO) {
-
-        // if (contaRepository.existsById(dto.getNumeroConta())) {
-        // throw new ContaJaExisteException();
-        // }
-
         Conta conta = new Conta();
-        conta.setConta(contaDTO.getNumeroConta());
         conta.setSaldo(contaDTO.getSaldo());
-
         Conta contaSalva = contaRepository.save(conta);
-
-        // Cria e retorna DTO atualizado
         return new ContaDTO(contaSalva.getConta(), contaSalva.getSaldo());
     }
 
@@ -47,43 +39,76 @@ public class ContaService {
     }
 
     public List<ContaDTO> listarContas() {
-
         List<ContaDTO> contaDTOs = new ArrayList<>();
         List<Conta> contas = contaRepository.findAll();
-
         for (Conta conta : contas) {
             contaDTOs.add(toDTO(conta));
-            
         }
         return contaDTOs;
-
     }
 
-    public ContaDTO realizarTransacao(TransacaoDTO transacaoDTO) {
+    public ContaDTO realizarPagamento(TransacaoDTO transacaoDTO) {
         Conta conta = contaRepository.findById(transacaoDTO.getContaDestino())
                 .orElseThrow(ContaNaoEncontradaException::new);
 
-        double taxa = calcularTaxa(transacaoDTO.getFormaPagamento(), transacaoDTO.getValor());
-        double totalDebito = transacaoDTO.getValor() + taxa;
+        BigDecimal taxa = calcularTaxa(transacaoDTO.getFormaPagamento(), transacaoDTO.getValor());
+        BigDecimal totalDebito = transacaoDTO.getValor().add(taxa);
 
-        if (conta.getSaldo() < totalDebito) {
+        if (conta.getSaldo().compareTo(totalDebito) < 0) {
             throw new SaldoInsuficienteException();
         }
 
-        conta.setSaldo(conta.getSaldo() - totalDebito);
+        conta.setSaldo(conta.getSaldo().subtract(totalDebito));
         Conta contaAtualizada = contaRepository.save(conta);
 
         return toDTO(contaAtualizada);
     }
 
-    private double calcularTaxa(String formaPagamento, double valor) {
+    public void depositar(Integer numeroConta, BigDecimal valor) {
+        if (valor.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("Valor do depósito deve ser positivo");
+        }
+
+        Conta conta = contaRepository.findByConta(numeroConta)
+                .orElseThrow(() -> new RuntimeException("Conta não encontrada"));
+
+        conta.setSaldo(conta.getSaldo().add(valor));
+        contaRepository.save(conta);
+    }
+
+    public void transferir(Integer contaOrigem, Integer contaDestino, BigDecimal valor) {
+        if (contaOrigem.equals(contaDestino)) {
+            throw new RuntimeException("Contas devem ser diferentes");
+        }
+
+        Conta origem = contaRepository.findByConta(contaOrigem)
+                .orElseThrow(() -> new RuntimeException("Conta de origem não encontrada"));
+        Conta destino = contaRepository.findByConta(contaDestino)
+                .orElseThrow(() -> new RuntimeException("Conta de destino não encontrada"));
+
+        if (valor.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("Valor da transferência deve ser positivo");
+        }
+
+        if (origem.getSaldo().compareTo(valor) < 0) {
+            throw new RuntimeException("Saldo insuficiente");
+        }
+
+        origem.setSaldo(origem.getSaldo().subtract(valor));
+        destino.setSaldo(destino.getSaldo().add(valor));
+
+        contaRepository.save(origem);
+        contaRepository.save(destino);
+    }
+
+    private BigDecimal calcularTaxa(String formaPagamento, BigDecimal valor) {
         switch (formaPagamento.toUpperCase()) {
             case "D":
-                return valor * 0.03;
+                return valor.multiply(new BigDecimal("0.03"));
             case "C":
-                return valor * 0.05;
+                return valor.multiply(new BigDecimal("0.05"));
             case "P":
-                return 0.0;
+                return BigDecimal.ZERO;
             default:
                 throw new IllegalArgumentException("Forma de pagamento inválida: " + formaPagamento);
         }
@@ -95,5 +120,5 @@ public class ContaService {
                 .saldo(conta.getSaldo())
                 .build();
     }
-
 }
+

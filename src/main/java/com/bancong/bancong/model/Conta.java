@@ -1,6 +1,11 @@
 package com.bancong.bancong.model;
 
-import javax.persistence.*;
+import java.math.BigDecimal;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 
 
 @Entity
@@ -10,7 +15,7 @@ public class Conta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer conta;
 
-    private Double saldo;
+    private BigDecimal saldo;
 
     public Integer getConta() {
         return conta;
@@ -20,13 +25,11 @@ public class Conta {
         this.conta = conta;
     }
 
-    public Double getSaldo() {
+    public BigDecimal getSaldo() {
         return saldo;
     }
 
-    public void setSaldo(Double saldo) {
+    public void setSaldo(BigDecimal saldo) {
         this.saldo = saldo;
     }
-
-    
 }

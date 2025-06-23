@@ -18,14 +18,19 @@ public class TransacaoController {
 
     @PostMapping
     public ResponseEntity<ContaDTO> realizarPagamento(@RequestBody TransacaoDTO transacaoDTO) {
-        ContaDTO conta = contaService.realizarTransacao(transacaoDTO);
+        ContaDTO conta = contaService.realizarPagamento(transacaoDTO);
         return ResponseEntity.status(201).body(conta);
     }
 
-    // @PostMapping
-    // public ResponseEntity<ContaDTO> depositar(@RequestBody ContaDTO contaDTO) {
-    //     ContaDTO novaConta = contaService.criarConta(contaDTO);
-    //     return ResponseEntity.status(201).body(novaConta);
-    // }
+    @PostMapping("/deposito")
+    public ResponseEntity<String> depositar(@RequestBody TransacaoDTO dto) {
+        contaService.depositar(dto.getContaDestino(), dto.getValor());
+        return ResponseEntity.ok("Depósito realizado com sucesso.");
+    }
 
+    @PostMapping("/transferencia")
+    public ResponseEntity<String> transferir(@RequestBody TransacaoDTO dto) {
+        contaService.transferir(dto.getContaOrigem(), dto.getContaDestino(), dto.getValor());
+        return ResponseEntity.ok("Transferência realizada com sucesso.");
+    }
 }

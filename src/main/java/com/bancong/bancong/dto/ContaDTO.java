@@ -1,6 +1,12 @@
 package com.bancong.bancong.dto;
 
-import lombok.*;
+import java.math.BigDecimal;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -9,5 +15,5 @@ import lombok.*;
 @Builder
 public class ContaDTO {
     private Integer numeroConta;
-    private Double saldo;
+    private BigDecimal saldo;
 }
